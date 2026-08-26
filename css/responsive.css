@@ -1,0 +1,266 @@
+/* ============================================
+   RENTA — Responsive Styles
+   ============================================ */
+
+/* ---------- TABLET (< 1024px) ---------- */
+@media (max-width: 1024px) {
+  :root {
+    --header-height: 64px;
+  }
+
+  h1 { font-size: var(--text-4xl); }
+  h2 { font-size: var(--text-3xl); }
+  
+  .hero-visual {
+    display: none;
+  }
+
+  .hero-content {
+    max-width: 100%;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-6);
+  }
+
+  .listings-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pricing-sidebar {
+    position: relative;
+    top: 0;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-8);
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .contract-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- MOBILE (< 768px) ---------- */
+@media (max-width: 768px) {
+  :root {
+    --header-height: 60px;
+  }
+
+  h1 { font-size: var(--text-3xl); }
+  h2 { font-size: var(--text-2xl); }
+  h3 { font-size: var(--text-xl); }
+
+  .container {
+    padding: 0 var(--space-4);
+  }
+
+  /* Header Mobile */
+  .nav-links {
+    display: none;
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(6, 6, 11, 0.98);
+    backdrop-filter: blur(20px);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-8);
+    z-index: 999;
+  }
+
+  .nav-links.open {
+    display: flex;
+  }
+
+  .nav-links a {
+    font-size: var(--text-xl);
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+  }
+
+  /* Hero Mobile */
+  .hero {
+    min-height: 60vh;
+  }
+
+  .hero-content {
+    padding: var(--space-10) 0;
+  }
+
+  .hero h1 {
+    font-size: clamp(1.8rem, 7vw, 2.5rem);
+  }
+
+  .hero-description {
+    font-size: var(--text-base);
+  }
+
+  /* Search Bar Mobile */
+  .search-bar {
+    flex-direction: column;
+    border-radius: var(--radius-lg);
+  }
+
+  .search-divider {
+    width: 100%;
+    height: 1px;
+    margin: 0;
+  }
+
+  .search-btn {
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+  }
+
+  /* Stats Mobile */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+  }
+
+  .stat-number {
+    font-size: var(--text-2xl);
+  }
+
+  /* Listings Mobile */
+  .listings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .listings-header {
+    flex-direction: column;
+    gap: var(--space-3);
+    align-items: flex-start;
+  }
+
+  /* Card Mobile */
+  .card-image {
+    height: 200px;
+  }
+
+  .card-features {
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .card-footer {
+    flex-direction: column;
+    gap: var(--space-3);
+    align-items: flex-start;
+  }
+
+  /* Detail Mobile */
+  .gallery-main {
+    height: 280px;
+  }
+
+  .gallery-thumbs {
+    display: none;
+  }
+
+  .detail-title {
+    font-size: var(--text-2xl);
+  }
+
+  .detail-chips {
+    gap: var(--space-2);
+  }
+
+  .detail-chip {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-xs);
+  }
+
+  .detail-section {
+    padding: var(--space-4);
+  }
+
+  .pricing-amount .price {
+    font-size: var(--text-3xl);
+  }
+
+  .detail-map {
+    height: 220px;
+  }
+
+  /* Footer Mobile */
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    gap: var(--space-4);
+    text-align: center;
+  }
+
+  /* WhatsApp Float Mobile */
+  .whatsapp-float {
+    bottom: var(--space-4);
+    right: var(--space-4);
+    width: 54px;
+    height: 54px;
+  }
+
+  [dir="rtl"] .whatsapp-float {
+    right: auto;
+    left: var(--space-4);
+  }
+
+  .back-to-top {
+    right: calc(var(--space-4) + 62px);
+  }
+
+  [dir="rtl"] .back-to-top {
+    right: auto;
+    left: calc(var(--space-4) + 62px);
+  }
+
+  /* Filter tags scroll */
+  .filter-tags {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: var(--space-2);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .filter-tag {
+    flex-shrink: 0;
+  }
+}
+
+/* ---------- SMALL MOBILE (< 400px) ---------- */
+@media (max-width: 400px) {
+  .hero h1 {
+    font-size: 1.6rem;
+  }
+
+  .card-price .amount {
+    font-size: var(--text-xl);
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .stat-item {
+    padding: var(--space-2);
+  }
+}

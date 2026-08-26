@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Portal — Renta Property Management</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#06060b">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔑</text></svg>">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="./css/main.css">
+  <link rel="stylesheet" href="./css/components.css">
+  <link rel="stylesheet" href="./css/admin.css">
+  <link rel="stylesheet" href="./css/responsive.css">
+</head>
+<body class="admin-page">
+
+  <!-- ══════════════════════════════════════════
+       1. LOGIN SECTION
+       ══════════════════════════════════════════ -->
+  <section class="login-wrapper" id="login-section">
+    <div class="login-card">
+      <div class="login-header">
+        <a href="index.html" class="logo">
+          <div class="logo-icon">R</div>
+          <div class="logo-text">Rent<span>a</span></div>
+        </a>
+        <h2 style="font-size:var(--text-xl);margin-top:var(--space-2);">Admin Control Portal</h2>
+        <p class="login-subtitle">Sign in to manage listings, mark properties as sold, and sync with your Google Sheet.</p>
+      </div>
+
+      <!-- Error Alert -->
+      <div class="alert-message alert-error" id="login-alert" style="display:none;"></div>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label for="login-email">Admin Email</label>
+          <input type="email" id="login-email" class="form-input" required autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" class="form-input" required autocomplete="current-password">
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="login-submit-btn" style="width:100%;margin-top:var(--space-4);padding:var(--space-4);">
+          Sign In to Portal
+        </button>
+      </form>
+
+      <div style="text-align:center;margin-top:var(--space-6);">
+        <a href="index.html" style="font-size:var(--text-xs);color:var(--neutral-500);text-decoration:underline;">
+          ← Back to Public Website
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       2. DASHBOARD SECTION (Shown when logged in)
+       ══════════════════════════════════════════ -->
+  <section class="admin-dashboard" id="dashboard-section" style="display:none;">
+    
+    <!-- Top Admin Bar -->
+    <header class="admin-navbar">
+      <div class="admin-nav-inner">
+        <div style="display:flex;align-items:center;gap:var(--space-4);">
+          <a href="index.html" class="logo">
+            <div class="logo-icon">R</div>
+            <div class="logo-text">Rent<span>a</span> <span style="font-size:0.7rem;background:rgba(212,168,83,0.15);color:var(--gold-400);padding:2px 8px;border-radius:4px;vertical-align:middle;margin-left:4px;">ADMIN</span></div>
+          </a>
+
+          <!-- Google Sheet Sync Status Badge -->
+          <div class="sync-badge" id="sync-badge" title="Click to configure Google Sheets integration">
+            <span class="sync-indicator local" id="sync-indicator"></span>
+            <span id="sync-label">Local Storage Mode</span>
+          </div>
+        </div>
+
+        <div class="admin-nav-actions">
+          <!-- Add Property CTA -->
+          <button type="button" class="btn btn-primary" id="admin-add-prop-btn" style="padding:var(--space-2) var(--space-4);font-size:var(--text-xs);">
+            ➕ Add New Property
+          </button>
+
+          <!-- Google Sheet Settings Button -->
+          <button type="button" class="btn btn-outline" id="admin-settings-btn" style="padding:var(--space-2) var(--space-4);font-size:var(--text-xs);" title="Configure Google Sheet URL">
+            ⚙️ Google Sheet Sync
+          </button>
+
+          <!-- Current User Profile -->
+          <div class="admin-user-badge">
+            <div class="user-avatar" id="admin-display-avatar">A</div>
+            <div class="user-info">
+              <div class="user-name" id="admin-display-name">Admin</div>
+              <div class="user-role" id="admin-display-role">Super Admin</div>
+            </div>
+          </div>
+
+          <!-- Public Website Link -->
+          <a href="index.html" target="_blank" class="btn-action" title="Open Public Website">
+            🌐 Live Site
+          </a>
+
+          <!-- Logout Button -->
+          <button type="button" class="btn-action" id="logout-btn" style="color:var(--status-sold);" title="Sign Out">
+            🚪 Logout
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="admin-main">
+      
+      <!-- KPI Stats Grid -->
+      <div class="admin-stats-grid">
+        <div class="admin-stat-card">
+          <div class="stat-icon">🏢</div>
+          <div class="stat-num" id="stat-total-props">0</div>
+          <div class="stat-title">Total Properties</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="stat-icon">🟢</div>
+          <div class="stat-num green" id="stat-available-props">0</div>
+          <div class="stat-title">Available for Rent</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="stat-icon">🔴</div>
+          <div class="stat-num red" id="stat-sold-props">0</div>
+          <div class="stat-title">Marked as Sold / Rented</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="stat-icon">💰</div>
+          <div class="stat-num gold" id="stat-portfolio-value">0 SAR</div>
+          <div class="stat-title">Monthly Rental Portfolio</div>
+        </div>
+      </div>
+
+      <!-- Action & Filter Bar -->
+      <div class="admin-controls">
+        <div class="admin-search-wrapper">
+          <input type="text" id="admin-search-input" class="admin-search-input">
+          
+          <select id="admin-filter-type" class="admin-filter-select">
+            <option value="">All Types (Apartments, Villas, Studios)</option>
+            <option value="Apartment">Apartment</option>
+            <option value="Villa">Villa</option>
+            <option value="Studio">Studio</option>
+          </select>
+
+          <select id="admin-filter-status" class="admin-filter-select">
+            <option value="">All Statuses</option>
+            <option value="Available">🟢 Available Only</option>
+            <option value="Sold">🔴 Sold Only</option>
+          </select>
+        </div>
+
+        <button type="button" class="btn btn-outline" id="admin-refresh-btn" style="padding:var(--space-3) var(--space-4);font-size:var(--text-xs);">
+          🔄 Refresh Data
+        </button>
+      </div>
+
+      <!-- Listings Table Container -->
+      <div class="admin-table-container">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th>Type & Rooms</th>
+              <th>Location</th>
+              <th>Rent (SAR)</th>
+              <th>Status</th>
+              <th style="text-align:right;">Quick Actions</th>
+            </tr>
+          </thead>
+          <tbody id="admin-table-body">
+            <!-- Rendered by js/admin.js -->
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       3. ADD / EDIT PROPERTY MODAL
+       ══════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="property-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-property-title">Add New Property Listing</h3>
+        <button type="button" class="modal-close" id="modal-close-btn" aria-label="Close">✕</button>
+      </div>
+
+      <form id="property-form">
+        <input type="hidden" id="prop-id" value="">
+        <input type="hidden" id="prop-features-hidden" value="">
+
+        <!-- SECTION 1: BASIC INFO -->
+        <div class="form-section-title">
+          <span>🏠</span> Basic Property Information
+        </div>
+
+        <div class="form-group">
+          <label for="prop-title">Property Title *</label>
+          <input type="text" id="prop-title" class="form-input" required>
+        </div>
+
+        <div class="modal-grid-3">
+          <div class="form-group">
+            <label for="prop-type">Property Type *</label>
+            <select id="prop-type" class="form-input" required>
+              <option value="Apartment">Apartment</option>
+              <option value="Villa">Villa</option>
+              <option value="Studio">Studio</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="prop-bedrooms">Bedrooms</label>
+            <input type="number" id="prop-bedrooms" class="form-input" min="0" max="20" value="1">
+          </div>
+
+          <div class="form-group">
+            <label for="prop-bathrooms">Bathrooms</label>
+            <input type="number" id="prop-bathrooms" class="form-input" min="1" max="20" value="1">
+          </div>
+        </div>
+
+        <div class="modal-grid-2">
+          <div class="form-group">
+            <label for="prop-floor">Floor Level</label>
+            <input type="text" id="prop-floor" class="form-input" value="Ground Floor">
+          </div>
+
+          <div class="form-group">
+            <label for="prop-furnished">Furnishing Status *</label>
+            <select id="prop-furnished" class="form-input" required>
+              <option value="Fully Furnished">Fully Furnished</option>
+              <option value="Semi Furnished">Semi Furnished</option>
+              <option value="Unfurnished">Unfurnished</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- SECTION 2: PRICING & CONTRACT -->
+        <div class="form-section-title">
+          <span>💰</span> Financials & Contract Terms
+        </div>
+
+        <div class="modal-grid-3">
+          <div class="form-group">
+            <label for="prop-monthly-rent">Monthly Rent (SAR) *</label>
+            <input type="number" id="prop-monthly-rent" class="form-input" required min="100">
+          </div>
+
+          <div class="form-group">
+            <label for="prop-yearly-rent">Yearly Rent (SAR) *</label>
+            <input type="number" id="prop-yearly-rent" class="form-input" required min="1000">
+          </div>
+
+          <div class="form-group">
+            <label for="prop-installments">Installments / Year</label>
+            <select id="prop-installments" class="form-input">
+              <option value="1">1 Installment (Annual)</option>
+              <option value="2" selected>2 Installments</option>
+              <option value="3">3 Installments</option>
+              <option value="4">4 Installments (Quarterly)</option>
+              <option value="12">12 Installments (Monthly)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-grid-3">
+          <div class="form-group">
+            <label for="prop-water-elec">Water & Elec (SAR / Year)</label>
+            <input type="number" id="prop-water-elec" class="form-input" value="2500">
+          </div>
+
+          <div class="form-group">
+            <label for="prop-security-deposit">Security Deposit (SAR)</label>
+            <input type="number" id="prop-security-deposit" class="form-input" value="2000">
+          </div>
+
+          <div class="form-group">
+            <label for="prop-office-fees">Office & RE Fees</label>
+            <input type="text" id="prop-office-fees" class="form-input" value="Applicable">
+          </div>
+        </div>
+
+        <div class="modal-grid-2">
+          <div class="form-group">
+            <label for="prop-contract-type">Contract Type</label>
+            <input type="text" id="prop-contract-type" class="form-input" value="Ejar Contract">
+          </div>
+
+          <div class="form-group">
+            <label for="prop-contract-duration">Contract Duration</label>
+            <input type="text" id="prop-contract-duration" class="form-input" value="1 year">
+          </div>
+        </div>
+
+        <!-- SECTION 3: LOCATION -->
+        <div class="form-section-title">
+          <span>📍</span> Location & Neighborhood
+        </div>
+
+        <div class="modal-grid-2">
+          <div class="form-group">
+            <label for="prop-area">District / Area *</label>
+            <input type="text" id="prop-area" class="form-input" required>
+          </div>
+
+          <div class="form-group">
+            <label for="prop-city">City *</label>
+            <input type="text" id="prop-city" class="form-input" value="Riyadh" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="prop-landmarks">Nearby Landmarks</label>
+          <input type="text" id="prop-landmarks" class="form-input">
+        </div>
+
+        <div class="form-group">
+          <label for="prop-maps-url">Google Maps Location Link</label>
+          <input type="url" id="prop-maps-url" class="form-input">
+        </div>
+
+        <!-- SECTION 4: FEATURES & AMENITIES -->
+        <div class="form-section-title">
+          <span>✨</span> Features & Amenities (Click to toggle)
+        </div>
+
+        <div class="feature-toggles" id="feature-tags-container">
+          <!-- Injected dynamically -->
+        </div>
+
+        <div class="form-group">
+          <label for="prop-custom-features">Additional Custom Features (Comma separated)</label>
+          <input type="text" id="prop-custom-features" class="form-input">
+        </div>
+
+        <!-- SECTION 5: MEDIA -->
+        <div class="form-section-title">
+          <span>🖼️</span> Images & Video Walkthrough
+        </div>
+
+        <div class="form-group">
+          <label for="prop-images">Property Photos (Comma-separated Image URLs or Google Drive sharing links)</label>
+          <input type="text" id="prop-images" class="form-input">
+          <div class="image-preview-strip" id="image-previews"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="prop-video-url">Video Walkthrough URL (Optional)</label>
+          <input type="url" id="prop-video-url" class="form-input">
+        </div>
+
+        <!-- SECTION 6: CONTACT & STATUS -->
+        <div class="form-section-title">
+          <span>🏷️</span> Status & WhatsApp Enquiry Number
+        </div>
+
+        <div class="modal-grid-2">
+          <div class="form-group">
+            <label for="prop-status">Initial Status *</label>
+            <select id="prop-status" class="form-input" required>
+              <option value="Available">🟢 Available</option>
+              <option value="Sold">🔴 Sold / Rented Out</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="prop-whatsapp">WhatsApp Number for this Listing</label>
+            <input type="text" id="prop-whatsapp" class="form-input" value="0573157876">
+          </div>
+        </div>
+
+        <!-- Modal Actions -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" id="modal-cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="modal-save-btn">Save Property Listing</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       4. GOOGLE SHEETS SETTINGS MODAL
+       ══════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="settings-modal">
+    <div class="modal-content" style="max-width:580px;">
+      <div class="modal-header">
+        <h3 class="modal-title">⚙️ Google Sheets Integration</h3>
+        <button type="button" class="modal-close" id="settings-close-btn" aria-label="Close">✕</button>
+      </div>
+
+      <div style="font-size:var(--text-sm);color:var(--neutral-300);line-height:1.6;margin-bottom:var(--space-5);">
+        Connect your website with your Google Sheet using our free Google Apps Script Web App. This allows live 2-way syncing for listings and authorized admin user logins!
+      </div>
+
+      <div class="form-group">
+        <label for="settings-sheet-url">Google Apps Script Web App URL</label>
+        <input type="url" id="settings-sheet-url" class="form-input">
+      </div>
+
+      <div id="settings-test-status" style="font-size:var(--text-xs);margin-bottom:var(--space-4);min-height:20px;"></div>
+
+      <div style="display:flex;gap:var(--space-3);margin-bottom:var(--space-6);">
+        <button type="button" class="btn btn-outline" id="settings-test-btn" style="flex:1;">
+          🧪 Test Connection
+        </button>
+      </div>
+
+      <div style="background:rgba(212,168,83,0.06);border:1px solid rgba(212,168,83,0.2);border-radius:var(--radius-lg);padding:var(--space-4);font-size:var(--text-xs);color:var(--neutral-300);">
+        <div style="font-weight:700;color:var(--gold-400);margin-bottom:var(--space-2);">📋 Quick Setup:</div>
+        <ol style="margin-left:1.2rem;line-height:1.6;">
+          <li>Open your Google Sheet and click <strong>Extensions > Apps Script</strong>.</li>
+          <li>Paste the provided script from <code>admin-guide/GoogleAppsScript.js</code>.</li>
+          <li>Click <strong>Deploy > New deployment > Web app</strong>.</li>
+          <li>Set access to <strong>"Anyone"</strong> and copy your Web App URL here!</li>
+        </ol>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="settings-save-btn" style="width:100%;">
+          Save Connection Settings
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ SCRIPTS ═══════════ -->
+  <script type="module">
+    import { initAdminPortal } from './js/admin.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initAdminPortal();
+    });
+  </script>
+</body>
+</html>

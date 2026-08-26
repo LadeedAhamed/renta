@@ -222,32 +222,56 @@ export async function fetchListings(forceRefresh = false) {
 
   // If live Google Sheet API is connected, fetch real production listings
   if (apiUrl) {
-    if (!forceRefresh) {
+    if (forceRefresh) {
+      try {
+        const response = await fetch(`${apiUrl}?action=getListings&t=${Date.now()}`);
+        if (response.ok) {
+          const json = await response.json();
+          if (Array.isArray(json)) {
+            const processed = json.map(normalizeProperty);
+            saveStoredListings(processed);
+            sessionStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), data: processed }));
+            return processed;
+          }
+        }
+      } catch (err) {
+        console.warn('Live Google Sheet fetch failed, falling back to local store:', err);
+      }
+      return getStoredListings();
+    } else {
+      // Non-blocking fetch (Stale-while-revalidate)
+      let shouldFetch = false;
       try {
         const cachedStr = sessionStorage.getItem(CACHE_KEY);
         if (cachedStr) {
           const cacheData = JSON.parse(cachedStr);
-          if (Date.now() - cacheData.timestamp < CACHE_DURATION) {
-            return cacheData.data;
+          if (Date.now() - cacheData.timestamp >= CACHE_DURATION) {
+            shouldFetch = true;
           }
+        } else {
+          shouldFetch = true;
         }
-      } catch (e) {}
-    }
-
-    try {
-      const response = await fetch(`${apiUrl}?action=getListings&t=${Date.now()}`);
-      if (response.ok) {
-        const json = await response.json();
-        if (Array.isArray(json)) {
-          const processed = json.map(normalizeProperty);
-          saveStoredListings(processed);
-          // Set cache AFTER saveStoredListings since it clears the cache
-          sessionStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), data: processed }));
-          return processed;
-        }
+      } catch (e) {
+        shouldFetch = true;
       }
-    } catch (err) {
-      console.warn('Live Google Sheet fetch failed, falling back to local store:', err);
+
+      if (shouldFetch) {
+        // Fire and forget background sync
+        fetch(`${apiUrl}?action=getListings&t=${Date.now()}`)
+          .then(res => res.ok ? res.json() : null)
+          .then(json => {
+            if (Array.isArray(json)) {
+              const processed = json.map(normalizeProperty);
+              saveStoredListings(processed);
+              sessionStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), data: processed }));
+              window.dispatchEvent(new CustomEvent('listingsUpdated'));
+            }
+          })
+          .catch(err => console.warn('Background sync failed:', err));
+      }
+      
+      // Return immediately
+      return getStoredListings();
     }
   }
 

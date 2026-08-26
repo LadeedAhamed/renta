@@ -238,6 +238,14 @@ export async function initListings() {
 
   // Fetch data
   allListings = await fetchListings();
+  
+  if (allListings.length === 0) {
+    // If it's a first-time visitor with an empty cache, reload when the background sync finishes
+    window.addEventListener('listingsUpdated', () => {
+      window.location.reload();
+    }, { once: true });
+  }
+
   filteredListings = [...allListings];
 
   // Populate dynamic filters

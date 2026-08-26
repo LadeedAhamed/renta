@@ -25,18 +25,31 @@ export async function initDetail() {
     </div>
   `;
 
-  const property = await fetchListingById(id);
+  // Fetch property data
+  let property = await fetchListingById(id);
 
   if (!property) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">🏠</div>
-        <h3>Property not found</h3>
-        <p>The property you're looking for doesn't exist or has been removed.</p>
-        <a href="index.html" class="btn btn-primary" style="margin-top:1.5rem;">${t('detail_back')}</a>
-      </div>
-    `;
-    return;
+    // It might be a first-time visitor where the local cache was empty but a background sync is running
+    const listings = await new Promise(resolve => {
+      const timeout = setTimeout(() => resolve(null), 5000);
+      window.addEventListener('listingsUpdated', () => {
+        clearTimeout(timeout);
+        import('./api.js').then(module => module.fetchListingById(id)).then(resolve);
+      }, { once: true });
+    });
+    
+    if (listings) {
+      property = listings;
+    } else {
+      container.innerHTML = `
+        <div class="error-state">
+          <h3>${t('property_not_found', 'Property Not Found')}</h3>
+          <p>${t('property_not_found_desc', 'This property may have been removed or is no longer available.')}</p>
+          <a href="index.html" class="btn btn-primary">${t('back_to_home', 'Back to Home')}</a>
+        </div>
+      `;
+      return;
+    }
   }
 
   renderDetail(container, property);
